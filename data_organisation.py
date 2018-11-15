@@ -67,10 +67,10 @@ regions = country_data[(country_data.short_name == 'East Asia & Pacific') |
             (country_data.short_name == 'North America') |
             (country_data.short_name == 'South Asia') |
             (country_data.short_name == 'Sub-Saharan Africa')][('short_name')].reset_index().set_index('country_code')
+regions.to_csv('region_index.csv', sep = '\t')
     
 
-country_index = country_filter.set_index('region').join(regions.reset_index().set_index('short_name'), lsuffix='_country', rsuffix='_region').drop(['currency_unit'], axis = 1).reset_index()
-country_index.columns = country_index.columns.str.replace('index', 'region')
+country_index = country_filter.set_index('region').join(regions.reset_index().set_index('short_name'), lsuffix='_country', rsuffix='_region').drop(['currency_unit'], axis = 1).reset_index().rename(columns = {'country_code':'region_code', 'index':'region'}).set_index('short_name')
 
 country_index.to_csv('county_index.csv', sep = '\t')
 
@@ -146,29 +146,34 @@ wdi_rgn_dr.to_csv('wdi_rgn_dr.csv', sep = '\t')
 
 
 '''
-wdi by country (Death rate)
-
-NOT YET REVISED AGAIN AFTER LOSING THE CODE!!!
+By country wdi (GDP) and cba
 '''
 
-"""
-cba_country = cba_data[(cba_data.record == "CBA_MtCO2perCap")].drop(['record', 'unnamed:_48'], axis = 1).T
+
+cba_country = cba_data[(cba_data.record == "CBA_MtCO2perCap")].drop(['record', 'unnamed:_48'], axis = 1)
 cba_country['code'] = 'cba'
-cba_country['year'] = cba_country['year'].astype(int)
 
 
 wdi_country = country_index.set_index('short_name').drop('country_code', axis = 1).join(wdi_data, lsuffix='_country', rsuffix = '_wdi')
-wdi_country = wdi_country[(wdi_country.indicator_name == "Death rate, crude (per 1,000 people)")].drop(['indicator_name', 'country_code', 'indicator_code', 'region', 'unnamed:_62'], axis = 1).T.reset_index()
+wdi_country = wdi_country[(wdi_country.indicator_name == "GDP per capita (current US$)")].drop(['indicator_name', 'country_code', 'indicator_code', 'region'], axis = 1).T.reset_index()
 wdi_country = wdi_country.rename(index=str, columns={"index": "year"})
-wdi_country['code'] = 'wdi'
 wdi_country['year'] = wdi_country['year'].astype(int)
-wdi_country = wdi_country[(wdi_country.year >= 1970) & (wdi_country.year <= 2015)].set_index('year')
+wdi_country = wdi_country[(wdi_country.year >= 1970) & (wdi_country.year <= 2015)]
+wdi_country['year'] = wdi_country['year'].astype(str)
+wdi_country = wdi_country.set_index('year').T
+wdi_country['code'] = 'wdi'
 
 cba_wdi = cba_country.append(wdi_country)
+cba_wdi.to_csv('cba_wdi_country.csv', sep = '\t')
 
-wdi_cba = cba_country.drop('code', axis = 1).join(wdi_country.drop('code', axis = 1), lsuffix = '_cba', rsuffix = '_wdi')
+wdi_country_filter = wdi_country['code'].reset_index().set_index('index')
+
+country_filter = cba_country['code'].reset_index().set_index('country').join(wdi_country_filter, lsuffix = '_cba', rsuffix = '_wdi')
+country_filter = country_filter[(country_filter.code_cba == 'cba') & (country_filter.code_wdi == 'wdi')]
+country_filter.to_csv('country_filter.csv', sep = '\t')
+
 
 #wdi_cba.plot()
 
-"""
+
 

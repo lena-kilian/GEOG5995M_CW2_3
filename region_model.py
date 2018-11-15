@@ -90,15 +90,15 @@ k = []
 plot_color = ["#27ae61", "#f1c40f", "#e77e23", "#2a80b9", "#34495e", "#e84c3d", "#7e8c8d"]
               
 def update_graph(frame_number):
-#    fig.clear()
+    fig.clear()
     pyplot.ylim(0, 60000)
     pyplot.xlim(0, 27)
     pyplot.xlabel("CBA (CO2 Mt/capita)")
     pyplot.ylabel("GDP per capita (current US$)")
     pyplot.title('Year: ' + str(all_data.columns[len(k)]))
-    for i in range(len(all_data) - 7):
-            pyplot.scatter(all_data.iloc[i][len(k)], all_data.iloc[i + 7][len(k)], color = plot_color[i], s=20)
-            pyplot.legend(all_data.index[0:7], loc = 2)
+    for i in range(int((len(all_data)) /2)):
+            pyplot.scatter(all_data.iloc[i][len(k)], all_data.iloc[i + int((len(all_data)) /2)][len(k)], color = plot_color[i], s=20)
+            pyplot.legend(all_data.index[0: int((len(all_data)) /2)], loc = 2)
     if len(k) < (len(all_data.columns) - 2):
         k.append(1)
     
