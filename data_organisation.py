@@ -75,7 +75,7 @@ country_index.columns = country_index.columns.str.replace('index', 'region')
 country_index.to_csv('county_index.csv', sep = '\t')
 
 '''
-cbd by region
+cbd by region - columns = regions, rows = years
 '''
 
 cba_region = cba_data.join(country_index.set_index('short_name'), lsuffix='_cba', rsuffix='_country')
@@ -90,7 +90,7 @@ cba_rgn_means.plot()
 
 
 '''
-wdi by regions  (GDP)
+wdi by regions  (GDP) - columns = regions, rows = years
 '''
 
 wdi_region = regions.reset_index().set_index('short_name').join(wdi_data, lsuffix='_region', rsuffix='_wdi').set_index('country_code_wdi').drop(['country_code_region', 'indicator_code'], axis = 1)
@@ -99,9 +99,31 @@ wdi_rgn_gdp = wdi_region[(wdi_region.indicator_name == 'GDP per capita (current 
 wdi_rgn_gdp['year'] = wdi_rgn_gdp['year'].astype(int)
 wdi_rgn_gdp = wdi_rgn_gdp[(wdi_rgn_gdp.year >= 1970) & (wdi_rgn_gdp.year <= 2015)].set_index('year')
 
-wdi_rgn_gdp.to_csv('wdi_rgn_gdp', sep = '\t')
+wdi_rgn_gdp.to_csv('wdi_rgn_gdp.csv', sep = '\t')
 
 #wdi_rgn_gdp.plot()
+
+
+'''
+cbd by region - columns = years, rows = regions
+'''
+
+cba_rgn_means_T = cba_rgn_means.T
+
+cba_rgn_means_T.to_csv('cba_rgn_T.csv', sep = '\t')
+
+#cba_rgn_means_T.plot()
+
+
+'''
+wdi by regions  (GDP) - columns = years, rows = regions
+'''
+
+wdi_rgn_gdp_T = wdi_rgn_gdp.T
+
+wdi_rgn_gdp_T.to_csv('wdi_rgn_gdp_T.csv', sep = '\t')
+
+#wdi_rgn_gdp_T.plot()
 
 
 
@@ -114,9 +136,11 @@ wdi_rgn_dr = wdi_region[(wdi_region.indicator_name == 'Death rate, crude (per 1,
 wdi_rgn_dr['year'] = wdi_rgn_dr['year'].astype(int)
 wdi_rgn_dr = wdi_rgn_dr[(wdi_rgn_dr.year >= 1970) & (wdi_rgn_dr.year <= 2015)].set_index('year')
 
-wdi_rgn_dr.to_csv('wdi_rgn_dr', sep = '\t')
+wdi_rgn_dr.to_csv('wdi_rgn_dr.csv', sep = '\t')
 
 #wdi_rgn_dr.plot()
+
+
 
 
 
