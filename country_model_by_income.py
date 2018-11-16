@@ -20,11 +20,15 @@ plot_colour = ["#27ae61", "#f1c40f", "#e77e23", "#2a80b9", "#34495e", "#e84c3d",
 pc2 = pandas.DataFrame(plot_colour, columns = list('a'))
 
 
-regions = pandas.read_csv('region_index.csv', sep = '\t').drop('short_name', axis = 1).rename(columns = {'country_code' : 'region_code'}).set_index('region_code')
-regions['colour_code'] = str('colour')
+income_filter = pandas.read_csv('income_filter.csv', sep = '\t').drop(['country_code', 'region'], axis = 1).set_index('short_name')
 
-for i in range(len(regions)):  
-    regions['colour_code'][i] = pc2['a'][i]
+income_legend = income_filter.reset_index().drop('short_name', axis = 1).drop_duplicates().set_index('income_group')
+income_legend['colour_code'] = str('colour')
+
+for i in range(len(income_legend)):  
+    income_legend['colour_code'][i] = pc2['a'][i]
+    
+income_filter = income_filter.join(income_legend, on = 'income_group')
     
     
 """
@@ -44,11 +48,11 @@ country_filter['country_list'] = country_filter.index.astype(str)
 
 country_index = pandas.read_csv('county_index.csv', sep = '\t').set_index('short_name').drop('region', axis = 1)
 
-country_dat = country_filter.join(country_data_all).join(country_index).join(regions, on = 'region_code').sort_index(axis=1, ascending=True).sort_values(by = ['code', 'country_list'], ascending=True)
+country_dat = country_filter.join(country_data_all).join(country_index).join(income_filter).sort_index(axis=1, ascending=True).sort_values(by = ['code', 'country_list'], ascending=True)
 
-legend_elements = []   
-for j in range(len(regions)):
-    legend_elements.append(Line2D([0], [0], marker = 'o', color = 'w', label = regions.index[j], markerfacecolor = regions['colour_code'][j], markersize=10))
+legend_elements = []
+for j in range(len(income_legend)):
+    legend_elements.append(Line2D([0], [0], marker = 'o', color = 'w', label = income_legend.index[j], markerfacecolor = income_legend['colour_code'][j], markersize=10))
 
 fig = pyplot.figure(figsize=(8, 8))
 k = []
@@ -56,7 +60,7 @@ k = []
 def update_graph(frame_number):
     fig.clear()
     pyplot.ylim(0, 130000)
-    pyplot.xlim(0, 40)
+    pyplot.xlim(0, 60)
     pyplot.xlabel("CBA (CO2 Mt/capita)")
     pyplot.ylabel("GDP per capita (current US$)")
     pyplot.title('Year: ' + str(country_dat.columns[len(k)]))
@@ -65,7 +69,7 @@ def update_graph(frame_number):
         pyplot.scatter(country_dat.iloc[i][len(k)], country_dat.iloc[i + int((len(country_dat)) /2)][len(k)], color = country_dat['colour_code'][i], s=20)
 
     pyplot.legend(handles = legend_elements, loc = 2) #, bbox_to_anchor=(0, 1))
-    if len(k) < (len(country_dat.columns) - 5):
+    if len(k) < (len(country_dat.columns) - 6):
         k.append(1)
     
 

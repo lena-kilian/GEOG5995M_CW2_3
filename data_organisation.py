@@ -11,7 +11,7 @@ check out for animation:
 '''
 
 import pandas
-import numpy as np
+import numpy
 
 
 '''
@@ -40,15 +40,15 @@ def region_filter(x, a): # not working atm
 loading and manipulating data
 '''
 
-cba_data = pandas.read_csv('national_cba_report_1970-2015.txt', sep = None)
+cba_data = pandas.read_csv('national_cba_report_1970-2015.txt', sep = None).replace(0, numpy.nan)
 clean_col_headers(cba_data)
 cba_data.set_index('country', inplace=True)
 
-wdi_data = pandas.read_csv('WDIData.csv', sep = None)
+wdi_data = pandas.read_csv('WDIData.csv', sep = None).replace(0, numpy.nan)
 clean_col_headers(wdi_data)
 wdi_data.set_index('country_name', inplace=True)
 
-country_data = pandas.read_csv('WDI_StatsCountry.csv', sep = None)
+country_data = pandas.read_csv('WDI_StatsCountry.csv', sep = None).replace(0, numpy.nan)
 clean_col_headers(country_data)
 country_data.set_index('country_code', inplace=True)
 
@@ -56,6 +56,10 @@ country_data.set_index('country_code', inplace=True)
 '''
 making filter indecies 
 '''
+
+income_filter = country_data[['short_name', 'region', 'income_group']].dropna(axis = 0)
+income_filter.to_csv('income_filter.csv', sep = '\t')
+
 country_filter = country_data[(country_data.currency_unit.notnull())][['currency_unit', 'region', 'short_name']]
 
 #regions = region_filter(country_data, country_data.short_name) # function not working 
@@ -78,15 +82,15 @@ country_index.to_csv('county_index.csv', sep = '\t')
 cbd by region - columns = regions, rows = years
 '''
 
-cba_region = cba_data.join(country_index.set_index('short_name'), lsuffix='_cba', rsuffix='_country')
+cba_region = cba_data.join(country_index, lsuffix='_cba', rsuffix='_country')
 cba_region = cba_region[(cba_region.record == 'CBA_MtCO2perCap')].drop(['record'], axis = 1).reset_index()
 cba_region.columns = cba_region.columns.str.replace('index', 'country').str.replace('country_code', 'region_code')
 
-cba_rgn_means = cba_region.replace(0, np.NaN).groupby(['region_code']).mean().T.drop('unnamed:_48', axis = 0)
+cba_rgn_means = cba_region.groupby(['region_code']).mean().T.drop('unnamed:_48', axis = 0)
 
 cba_rgn_means.to_csv('cba_rgn.csv', sep = '\t')
 
-cba_rgn_means.plot()
+#cba_rgn_means.plot()
 
 
 '''
@@ -154,7 +158,7 @@ cba_country = cba_data[(cba_data.record == "CBA_MtCO2perCap")].drop(['record', '
 cba_country['code'] = 'cba'
 
 
-wdi_country = country_index.set_index('short_name').drop('country_code', axis = 1).join(wdi_data, lsuffix='_country', rsuffix = '_wdi')
+wdi_country = country_index.drop('region_code', axis = 1).join(wdi_data, lsuffix='_country', rsuffix = '_wdi')
 wdi_country = wdi_country[(wdi_country.indicator_name == "GDP per capita (current US$)")].drop(['indicator_name', 'country_code', 'indicator_code', 'region'], axis = 1).T.reset_index()
 wdi_country = wdi_country.rename(index=str, columns={"index": "year"})
 wdi_country['year'] = wdi_country['year'].astype(int)
