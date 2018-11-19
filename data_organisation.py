@@ -10,6 +10,14 @@ check out for animation:
     https://python-graph-gallery.com/341-python-gapminder-animation/
 '''
 
+
+
+
+'''
+CHECK IF IT'S A GOOD IDEA TO CHANGE THIS INTO A CLASS? MOST LIKELY NOT THOUGH AS ALL THE DFS HAVE TO ME TREATED INDIVIDUALLY ....
+'''
+
+
 import pandas
 import numpy
 
@@ -156,6 +164,7 @@ By country wdi (GDP) and cba
 
 cba_country = cba_data[(cba_data.record == "CBA_MtCO2perCap")].drop(['record', 'unnamed:_48'], axis = 1)
 cba_country['code'] = 'cba'
+cba_country.drop('code', axis = 1).to_csv('cba_country.csv', sep = '\t')
 
 
 wdi_country = country_index.drop('region_code', axis = 1).join(wdi_data, lsuffix='_country', rsuffix = '_wdi')
@@ -166,6 +175,8 @@ wdi_country = wdi_country[(wdi_country.year >= 1970) & (wdi_country.year <= 2015
 wdi_country['year'] = wdi_country['year'].astype(str)
 wdi_country = wdi_country.set_index('year').T
 wdi_country['code'] = 'wdi'
+wdi_country.drop('code', axis = 1).to_csv('wdi_country.csv', sep = '\t')
+
 
 cba_wdi = cba_country.append(wdi_country)
 cba_wdi.to_csv('cba_wdi_country.csv', sep = '\t')
