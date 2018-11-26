@@ -6,7 +6,12 @@ def remove_duplicates(var_list):
         if var_list[i] not in var_list_unique:
             var_list_unique.append(var_list[i])
     return var_list_unique
-    
+
+'''
+could potentially add a make_legend function here??
+'''
+
+
 class Countries:
     
     def __init__(self, country_name, colour_variable, year_list, cba, wdi, country_list):
@@ -40,6 +45,3 @@ class Countries:
             if self.colour_variable == colour_index[0][i]:
                 self.colour = colour_index[1][i]
 
-'''
-could potentially add a make_legend function here??
-'''

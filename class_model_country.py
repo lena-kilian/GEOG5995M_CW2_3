@@ -3,6 +3,8 @@ import class_framework
 from matplotlib import pyplot
 from matplotlib import animation
 from matplotlib.lines import Line2D
+import numpy
+from scipy.stats import pearsonr
 
 
 '''
@@ -81,3 +83,35 @@ def update_graph(frame_number):
         k.append(1)
 
 animation = animation.FuncAnimation(fig, update_graph, frames = (len(year_list)), repeat=False)
+
+
+'''
+correlations
+'''
+
+cor_dat = country_dat[country_dat.code == 'wdi'].drop(['code', 'region_code', 'country_list'], axis = 1).add_prefix('wdi_').join(country_dat[country_dat.code == 'cba'].drop(['code', 'region_code', 'country_list'], axis = 1).add_prefix('cba_'), rsuffix = '_cba', lsuffix = '_wdi').dropna().sort_index(axis = 1).T
+    
+cor_list = []
+p_list = []
+for i in range(len(year_list)):
+    cor_list.append(numpy.corrcoef(cor_dat.iloc[i].tolist(), cor_dat.iloc[i + len(year_list)].tolist())[0, 1])
+    
+cor_list = []
+p_list = []
+for i in range(len(year_list)):
+    cor_list.append(pearsonr(cor_dat.iloc[i].tolist(), cor_dat.iloc[i + len(year_list)].tolist())[0])
+    p_list.append(pearsonr(cor_dat.iloc[i].tolist(), cor_dat.iloc[i + len(year_list)].tolist())[1])
+
+cor_data = pandas.DataFrame({'year': year_list, 'pearon_correlation': cor_list, 'p-value': p_list}).set_index('year')
+       
+for i in range(len(cor_data)):
+    if cor_data['p-value'][i] < 0.001:
+        cor_data['significance'] = '***'
+    elif cor_data['p-value'][i] < 0.01:
+        cor_data['significance'] = '**'
+    elif cor_data['p-value'][i] < 0.05:
+        cor_data['significance'] = '*'
+
+
+
+

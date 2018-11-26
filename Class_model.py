@@ -36,8 +36,8 @@ make animation
 '''
 
 legend_elements = []   
-for j in range(len(cols[0])):
-    legend_elements.append(Line2D([0], [0], marker = 'o', color = 'w', label = cols[0][j], markerfacecolor = cols[1][j], markersize=10))
+for i in range(len(cols[0])):
+    legend_elements.append(Line2D([0], [0], marker = 'o', color = 'w', label = cols[0][i], markerfacecolor = cols[1][i], markersize=10))
 
 fig = pyplot.figure(figsize=(8, 8))
 k = []      

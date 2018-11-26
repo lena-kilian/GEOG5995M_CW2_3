@@ -11,6 +11,7 @@ from matplotlib import animation
 from matplotlib.lines import Line2D
 
 
+
 '''
 make colours --> maybe automate this to make a certain number of colours? could turn this into a function
 '''
@@ -69,3 +70,7 @@ def update_graph(frame_number):
     
 
 animation = animation.FuncAnimation(fig, update_graph, frames = (len(country_dat.columns)-2), repeat=False)
+
+
+from scipy.stats.stats import pearsonr
+

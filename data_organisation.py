@@ -31,7 +31,7 @@ def clean_col_headers(x):
     removes special characters from column headers, adds 'Y' to years in headers and removes capitalisation
     '''
     x.columns = x.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('(', '').str.replace(')', '').str.replace('"', '').str.replace('ï»¿', '')#.str.replace("19", "y19").str.replace("20", "y20")
-    x = x.dropna(axis = 1, how='all') # does not work atm
+    x = x.dropna(axis = 1, how='all')
 
 """
 def region_filter(x, a): # not working atm
