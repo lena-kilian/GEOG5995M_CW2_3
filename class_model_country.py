@@ -3,7 +3,6 @@ import class_framework
 from matplotlib import pyplot
 from matplotlib import animation
 from matplotlib.lines import Line2D
-import numpy
 from scipy.stats import pearsonr
 
 
@@ -150,4 +149,4 @@ pyplot.scatter(cor_data['country'], cor_data['pearson_correlation'])
 pyplot.plot(cor_data['country'], cor_data['pearson_correlation'], color = 'black')
 pyplot.xlabel("Country")
 pyplot.ylabel("Correlation Coefficient (Pearson's r)")
-''''
+'''
