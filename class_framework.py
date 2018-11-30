@@ -19,8 +19,8 @@ class Countries:
         self.wdi = wdi
         self.name = country_name
         self.years = year_list
-        self.colour_variable = colour_variable
-        self.colour = colour_variable
+        self.colour_variable = colour_variable # variable by which colours will be assigned
+        self.colour = colour_variable # assigned colour code (once makce_colours and assign_colours functions are used)
         self.country_list = country_list
         
     def __repr__(self):
