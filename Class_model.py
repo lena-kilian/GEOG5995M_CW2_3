@@ -3,12 +3,18 @@ import class_framework
 from matplotlib import pyplot
 from matplotlib import animation
 from matplotlib.lines import Line2D
-from scipy.stats import pearsonr
 
+'''
+import data
+'''
 
 cba_rgn = pandas.read_csv('cba_rgn.csv', sep = '\t').set_index('Unnamed: 0').sort_index(axis=0, ascending=True).sort_index(axis=1, ascending=True).T
 
 wdi_rgn_gdp = pandas.read_csv('wdi_rgn_gdp.csv', sep = '\t').set_index('year').sort_index(axis=0, ascending=True).sort_index(axis=1, ascending=True).T
+
+'''
+add countries to class
+'''
 
 rgn_list = cba_rgn.index.tolist()
 
