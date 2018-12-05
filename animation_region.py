@@ -57,7 +57,7 @@ def update_graph(frame_number):
     pyplot.ylabel("GDP per capita (current US$)")
     pyplot.title('Year: ' + str(year_list[len(k)]))
     for i in range(len(countries)):
-        pyplot.scatter(countries[i].cba[len(k)], countries[i].wdi[len(k)], color = countries[i].colour, s=20)
+        pyplot.scatter(countries[i].cba[len(k)], countries[i].wdi[len(k)], color = countries[i].colour, s = 40)
     pyplot.legend(handles = legend_elements, loc = 2)
     if len(k) < (len(year_list)):
         k.append(1)

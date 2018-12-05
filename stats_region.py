@@ -11,22 +11,17 @@ cba_data = pandas.read_csv('cba_rgn.csv', sep = '\t').set_index('Unnamed: 0').so
 
 wdi_data = pandas.read_csv('wdi_rgn_gdp.csv', sep = '\t').set_index('year').sort_index(axis=0, ascending=True).sort_index(axis=1, ascending=True).T
 
+norm_test = pandas.DataFrame(index = cba_data.index, columns = ['cba_sw', 'cba_p', 'wdi_sw', 'wdi_p', 'normal_dist'])
 
-cba_norm_test = []
-cba_p_list = []
 for i in range(len(cba_data)):
-    cba_norm_test.append(shapiro(cba_data.iloc[i])[0])
-    cba_p_list.append(shapiro(cba_data.iloc[i])[1])
-    
-    
-wdi_norm_test = []
-wdi_p_list = []
-for i in range(len(wdi_data)):
-    wdi_norm_test.append(shapiro(wdi_data.iloc[i])[0])
-    wdi_p_list.append(shapiro(wdi_data.iloc[i])[1])
-    
-pyplot.boxplot(cba_data)
-pyplot.boxplot(wdi_data)
+    norm_test['cba_sw'][i] = shapiro(cba_data.iloc[i])[0]
+    norm_test['cba_p'][i] = shapiro(cba_data.iloc[i])[1]
+    norm_test['wdi_sw'][i] = shapiro(wdi_data.iloc[i])[0]
+    norm_test['wdi_p'][i] = shapiro(wdi_data.iloc[i])[1]
+    if norm_test['cba_p'][i] > 0.05 and norm_test['wdi_p'][i] > 0.05:
+        norm_test['normal_dist'][i] = 'Yes'
+    else:
+        norm_test['normal_dist'][i] = 'No'   
 
 '''
 descriptives

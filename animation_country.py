@@ -7,44 +7,39 @@ from matplotlib.lines import Line2D
 
 '''
 load data
+
+---> CHANGE COUNTRY DATA TO REMOVE ALL THE NANs IN DATA ORGANISATION FILE. WILL THEN HAVE TO ADAPT THIS!!!
 '''
-regions = pandas.read_csv('region_index.csv', sep = '\t').drop('short_name', axis = 1).rename(columns = {'country_code' : 'region_code'}).set_index('region_code')
+regions = pandas.read_csv('country_index.csv', sep = '\t').drop(['region'], axis = 1)
 
-country_filter = pandas.read_csv('country_filter.csv', sep = '\t')
-country_filter['country'] = country_filter['country'].astype(str)
-country_filter = country_filter.set_index('country')
+country_data = pandas.read_csv('country_data.csv', sep = '\t').set_index('Unnamed: 0').sort_index(axis=0, ascending=True)
 
-country_dat = pandas.read_csv('country_data.csv', sep = '\t').set_index('Unnamed: 0').sort_index(axis=1, ascending=True).sort_values(by = ['code', 'country_list'], ascending=True)
-   
+regions = country_data.T.join(regions.set_index('short_name'))['region_code'].sort_index(axis=0, ascending=True).reset_index().rename(columns = {'index':'short_name'})
 
 '''
 make lists and countries in class 
 '''
 
-rgn_list = []
-for i in range(2):
-    rgn_list.append(country_dat[(country_dat['code'] == 'cba')].reset_index().filter(['Unnamed: 0', 'region_code']).T.iloc[i].values.tolist())
+cba_data = country_data[(country_data.index.str.contains('cba'))].T
+wdi_data = country_data[(country_data.index.str.contains('wdi'))].T
 
 cba_list = []
 wdi_list = []
-for i in range(len(country_dat)):
-    if country_dat['code'][i] == 'cba':
-        cba_list.append(country_dat.drop(['code', 'country_list', 'region_code'], axis = 1).iloc[i].values.tolist())
-    elif country_dat['code'][i] == 'wdi':
-        wdi_list.append(country_dat.drop(['code', 'country_list', 'region_code'], axis = 1).iloc[i].values.tolist())
+for i in range(len(cba_data)):
+    cba_list.append(cba_data.iloc[i].values.tolist())
+    wdi_list.append(wdi_data.iloc[i].values.tolist())
     
-year_list = country_dat.drop(['code', 'country_list', 'region_code'], axis = 1).columns.values.tolist()
+year_list = cba_data.columns.str.replace('cba_', '').tolist()
 
 countries = []
 
 for i in range(len(cba_list)):
-    countries.append(class_framework.Countries(rgn_list[0][i], rgn_list[1][i], year_list, cba_list[i], wdi_list[i], countries))
+    countries.append(class_framework.Countries(regions['short_name'][i], regions['region_code'][i], year_list, cba_list[i], wdi_list[i], countries))
 
 cols = countries[0].make_colours()
 
 for i in range(len(countries)):
     countries[i].assign_colours(cols)
-
     
 '''
 make animation
@@ -59,8 +54,8 @@ k = []
 
 def update_graph(frame_number):
     fig.clear()
-    pyplot.ylim(0, 60000)
-    pyplot.xlim(0, 27)
+    pyplot.ylim(0, 120000)
+    pyplot.xlim(0, 60)
     pyplot.xlabel("CBA (CO2 Mt/capita)")
     pyplot.ylabel("GDP per capita (current US$)")
     pyplot.title('Year: ' + str(year_list[len(k)]))
