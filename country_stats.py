@@ -26,6 +26,8 @@ year_list = cba_data.columns.tolist()
 ## all data
 descriptives_all = pandas.DataFrame(all_data.describe()).rename(columns = {'cba':'All_combined_cba', 'wdi':'All_combined_wdi'}).T
 
+print(descriptives_all)
+
 ## by countries
 descriptives_country = pandas.DataFrame(cba_data.T.describe()).join(pandas.DataFrame(wdi_data.T.describe()), lsuffix = '_cba', rsuffix = '_wdi').T
 
@@ -74,15 +76,15 @@ for i in range(len(cba_data.T)):
     else:
         norm_test_year['normal_dist'][i] = False  
 
-
 # correlations using spearman's rho, because distributions were not normal
 
 ## all data
 cor_data_all = pandas.DataFrame(index = ['All_combined'], columns = ['spearman_correlation', 'p_value', 'significance'])
 cor_data_all['spearman_correlation'][0] = spearmanr(all_data['cba'], all_data['wdi'])[0]
 cor_data_all['p_value'][0] = spearmanr(all_data['cba'], all_data['wdi'])[1]
-
 cor_data_all['significance'][0] = sig_level(cor_data_all['p_value'][0])
+
+print(cor_data_all)
 
 ## by country
 cor_data_country = cor_data.T.reset_index().rename(columns = {'Unnamed: 0':'index'}).set_index('index')
@@ -91,18 +93,23 @@ cor_list = []
 p_list = []
 country_list = []
 
-for i in range(int(len(cor_data_country) / 2)):
-    cor_list.append(spearmanr(cor_data_country.iloc[i].tolist(), cor_data_country.iloc[i + len(year_list)].tolist())[0])
-    p_list.append(spearmanr(cor_data_country.iloc[i].tolist(), cor_data_country.iloc[i + len(year_list)].tolist())[1])
+for i in range(len(cor_data_country)):
+    cor_list.append(spearmanr(cor_data_country.iloc[i][0 : int(len(cor_data_country.columns) / 2)].tolist(), 
+                              cor_data_country.iloc[0][int(len(cor_data_country.columns) / 2) : int(len(cor_data_country.columns))].tolist()
+                              )[0])
+    p_list.append(spearmanr(cor_data_country.iloc[i][0 : int(len(cor_data_country.columns) / 2)].tolist(), 
+                              cor_data_country.iloc[0][int(len(cor_data_country.columns) / 2) : int(len(cor_data_country.columns))].tolist()
+                              )[1])
     country_list.append(cor_data_country.index[i])
 
-cor_data_country = pandas.DataFrame({'country': country_list, 'spearman_correlation': cor_list, 'p_value': p_list})
-cor_data_country['country'] = cor_data_country['country'].str.replace('cba_', '')
+cor_data_country = pandas.DataFrame({'country': country_list, 'spearman_correlation': cor_list, 'p_value': p_list}).set_index('country')
+cor_data_country.index = cor_data_country.index.str.replace('cba_', '')
 cor_data_country['significance'] = 'ns'
        
 for i in range(len(cor_data_country)):
     cor_data_country['significance'][i] = sig_level(cor_data_country['p_value'][i])
 
+print(cor_data_country)
 
 ## by years
 cor_list = []
@@ -111,13 +118,13 @@ for i in range(len(year_list)):
     cor_list.append(spearmanr(cor_data.iloc[i].tolist(), cor_data.iloc[i + len(year_list)].tolist())[0])
     p_list.append(spearmanr(cor_data.iloc[i].tolist(), cor_data.iloc[i + len(year_list)].tolist())[1])
 
-cor_data_year = pandas.DataFrame({'year': year_list, 'spearman_correlation': cor_list, 'p_value': p_list})
-cor_data_year['year'] = cor_data_year['year'].astype('int')
+cor_data_year = pandas.DataFrame({'year': year_list, 'spearman_correlation': cor_list, 'p_value': p_list}).set_index('year')
 cor_data_year['significance'] = 'ns'
        
 for i in range(len(cor_data_year)):
     cor_data_year['significance'][i] = sig_level(cor_data_year['p_value'][i])
 
+print(cor_data_year)
 
 # saving findings to an excel file
        

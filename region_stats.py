@@ -20,6 +20,7 @@ descriptives = pandas.DataFrame(wdi_data.T.describe()).join(
         pandas.DataFrame(cba_data.T.describe()), lsuffix = '_wdi', rsuffix = '_cba').sort_index(axis=1, ascending=True).join(
         pandas.DataFrame(all_data.describe()).rename(columns = {'cba':'All_combined_cba', 'wdi':'All_combined_wdi'})).T
 
+print(descriptives)
 
 # normality testing 
 
@@ -43,6 +44,7 @@ for i in range(len(norm_test)):
     else:
         norm_test['normal_dist'][i] = False  
 
+print(norm_test)
 
 # correlations using spearman's rho, because distributions were not normal
 
@@ -63,6 +65,7 @@ cor_data['significance'] = 'ns'
 for i in range(len(cor_data)):
     cor_data['significance'][i] = sig_level(cor_data['p_value'][i])
 
+print(cor_data)
 
 # saving findings to an excel file
         
