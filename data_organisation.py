@@ -41,29 +41,6 @@ country_index = country_filter.set_index('region').join(
         region_index.reset_index().set_index('short_name'), lsuffix='_country', rsuffix='_region').drop(['currency_unit'], axis = 1
                                 ).reset_index().rename(columns = {'country_code':'region_code', 'index':'region'}).set_index('short_name')
 country_index.to_csv('country_index.csv', sep = '\t')
-    
-
-# cba by region
-
-cba_region = cba_data.join(country_index, lsuffix='_cba', rsuffix='_country')
-cba_region = cba_region[(cba_region.record == 'CBA_MtCO2perCap')].drop(['record'], axis = 1).reset_index()
-cba_region.columns = cba_region.columns.str.replace('index', 'country').str.replace('country_code', 'region_code')
-cba_region = cba_region.groupby(['region_code']).mean().T.drop('unnamed:_48', axis = 0)
-cba_region.to_csv('cba_rgn.csv', sep = '\t')
-
-
-# wdi (gdp) by region
-
-wdi_region = region_index.reset_index().set_index('short_name').join(
-        wdi_data, lsuffix='_region', rsuffix='_wdi'
-        ).set_index('country_code_wdi').drop(['country_code_region', 'indicator_code'], axis = 1)
-
-wdi_region = wdi_region[(wdi_region.indicator_name == 'GDP per capita (current US$)')].drop(
-        'indicator_name', axis = 1).T.reset_index().rename(columns = {'index':'year'})
-wdi_region['year'] = wdi_region['year'].astype(int)
-wdi_region = wdi_region[(wdi_region.year >= 1970) & (wdi_region.year <= 2015)].set_index('year')
-
-wdi_region.to_csv('wdi_rgn.csv', sep = '\t')
 
 
 # wdi (gdp) and cba by country

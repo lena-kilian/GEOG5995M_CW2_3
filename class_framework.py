@@ -42,10 +42,7 @@ class Countries:
         self.colour_variable = colour_variable # variable by which colours will be assigned
         self.colour = colour_variable # assigned colour code (once makce_colours and assign_colours functions are used)
         self.country_list = country_list
-        
-    def __repr__(self):
-        return (f"[{self.name}, CBA: {self.cba}, WDI: {self.wdi}]")
-    
+           
     def make_colours(self):
         var_list = []
         for i in range(len(self.country_list)):
