@@ -5,20 +5,17 @@ from matplotlib import animation
 from matplotlib.lines import Line2D
 
 
-'''
-load data
+# loading data
 
----> CHANGE COUNTRY DATA TO REMOVE ALL THE NANs IN DATA ORGANISATION FILE. WILL THEN HAVE TO ADAPT THIS!!!
-'''
 regions = pandas.read_csv('country_index.csv', sep = '\t').drop(['region'], axis = 1)
 
 country_data = pandas.read_csv('country_data.csv', sep = '\t').set_index('Unnamed: 0').sort_index(axis=0, ascending=True)
 
-regions = country_data.T.join(regions.set_index('short_name'))['region_code'].sort_index(axis=0, ascending=True).reset_index().rename(columns = {'index':'short_name'})
+regions = country_data.T.join(
+        regions.set_index('short_name'))['region_code'].sort_index(axis=0, ascending=True).reset_index().rename(columns = {'index':'short_name'})
 
-'''
-make lists and countries in class 
-'''
+
+# make 'countries' as a class
 
 cba_data = country_data[(country_data.index.str.contains('cba'))].T
 wdi_data = country_data[(country_data.index.str.contains('wdi'))].T
@@ -40,17 +37,19 @@ cols = countries[0].make_colours()
 
 for i in range(len(countries)):
     countries[i].assign_colours(cols)
-    
-'''
-make animation
-'''
+
+
+# make animation
 
 legend_elements = []   
 for j in range(len(cols[0])):
     legend_elements.append(Line2D([0], [0], marker = 'o', color = 'w', label = cols[0][j], markerfacecolor = cols[1][j], markersize=10))
 
 fig = pyplot.figure(figsize=(8, 8))
-k = []      
+k = []
+
+
+class_framework.create_folder('./country_charts/')   
 
 def update_graph(frame_number):
     fig.clear()
@@ -61,7 +60,13 @@ def update_graph(frame_number):
     pyplot.title('Year: ' + str(year_list[len(k)]))
     for i in range(len(countries)):
         pyplot.scatter(countries[i].cba[len(k)], countries[i].wdi[len(k)], color = countries[i].colour, s=20)
+    
     pyplot.legend(handles = legend_elements, loc = 2)
+    
+    # adding this bit will save a picture at each iteration
+    fname = './country_charts/country_chart_%3d.png' % (1970 + len(k))
+    pyplot.savefig(fname)
+    
     if len(k) < (len(year_list)):
         k.append(1)
 

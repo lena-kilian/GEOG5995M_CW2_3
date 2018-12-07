@@ -4,17 +4,15 @@ from matplotlib import pyplot
 from matplotlib import animation
 from matplotlib.lines import Line2D
 
-'''
-import data
-'''
+
+# loading data
 
 cba_rgn = pandas.read_csv('cba_rgn.csv', sep = '\t').set_index('Unnamed: 0').sort_index(axis=0, ascending=True).sort_index(axis=1, ascending=True).T
 
-wdi_rgn_gdp = pandas.read_csv('wdi_rgn_gdp.csv', sep = '\t').set_index('year').sort_index(axis=0, ascending=True).sort_index(axis=1, ascending=True).T
+wdi_rgn_gdp = pandas.read_csv('wdi_rgn.csv', sep = '\t').set_index('year').sort_index(axis=0, ascending=True).sort_index(axis=1, ascending=True).T
 
-'''
-add countries to class
-'''
+
+# make 'countries' as a class
 
 rgn_list = cba_rgn.index.tolist()
 
@@ -38,16 +36,18 @@ for i in range(len(countries)):
     countries[i].assign_colours(cols) 
 
 
-'''
-make animation
-'''
+# make animation
 
 legend_elements = []   
 for i in range(len(cols[0])):
     legend_elements.append(Line2D([0], [0], marker = 'o', color = 'w', label = cols[0][i], markerfacecolor = cols[1][i], markersize=10))
 
 fig = pyplot.figure(figsize=(8, 8))
-k = []      
+k = []          
+
+
+class_framework.create_folder('./region_charts/')
+
 
 def update_graph(frame_number):
     fig.clear()
@@ -58,7 +58,13 @@ def update_graph(frame_number):
     pyplot.title('Year: ' + str(year_list[len(k)]))
     for i in range(len(countries)):
         pyplot.scatter(countries[i].cba[len(k)], countries[i].wdi[len(k)], color = countries[i].colour, s = 40)
+    
     pyplot.legend(handles = legend_elements, loc = 2)
+    
+    # adding this bit will save a picture at each iteration
+    fname = './region_charts/region_chart_%3d.png' % (1970 + len(k))
+    pyplot.savefig(fname)
+    
     if len(k) < (len(year_list)):
         k.append(1)
 

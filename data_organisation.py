@@ -8,21 +8,9 @@ gender_data from https://datacatalog.worldbank.org/dataset/gender-statistics
 
 import pandas
 import numpy
+from class_framework import clean_col_headers
 
-'''
-functions
-'''
-
-def clean_col_headers(x):
-    '''
-    removes special characters from column headers, adds 'Y' to years in headers and removes capitalisation
-    '''
-    x.columns = x.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('(', '').str.replace(')', '').str.replace('"', '').str.replace('ï»¿', '')#.str.replace("19", "y19").str.replace("20", "y20")
-    x = x.dropna(axis = 1, how='all')
-
-'''
-loading data files
-'''
+# loading data files
 
 cba_data = pandas.read_csv('national_cba_report_1970-2015.txt', sep = None).replace(0, numpy.nan)
 clean_col_headers(cba_data)
@@ -37,9 +25,8 @@ clean_col_headers(country_data)
 country_data.set_index('country_code', inplace=True)
 
 
-'''
-making filter indecies 
-'''
+# making filter indecies (to ensure that countries are the same for cba and wdi, and to assign regions)
+
 country_filter = country_data[(country_data.currency_unit.notnull())][['currency_unit', 'region', 'short_name']]
 
 region_index = country_data[(country_data.short_name == 'East Asia & Pacific') | 
@@ -50,13 +37,13 @@ region_index = country_data[(country_data.short_name == 'East Asia & Pacific') |
             (country_data.short_name == 'South Asia') |
             (country_data.short_name == 'Sub-Saharan Africa')][('short_name')].reset_index().set_index('country_code')
 
-country_index = country_filter.set_index('region').join(region_index.reset_index().set_index('short_name'), lsuffix='_country', rsuffix='_region').drop(['currency_unit'], axis = 1).reset_index().rename(columns = {'country_code':'region_code', 'index':'region'}).set_index('short_name')
+country_index = country_filter.set_index('region').join(
+        region_index.reset_index().set_index('short_name'), lsuffix='_country', rsuffix='_region').drop(['currency_unit'], axis = 1
+                                ).reset_index().rename(columns = {'country_code':'region_code', 'index':'region'}).set_index('short_name')
 country_index.to_csv('country_index.csv', sep = '\t')
     
 
-'''
-cbd by region
-'''
+# cba by region
 
 cba_region = cba_data.join(country_index, lsuffix='_cba', rsuffix='_country')
 cba_region = cba_region[(cba_region.record == 'CBA_MtCO2perCap')].drop(['record'], axis = 1).reset_index()
@@ -64,28 +51,29 @@ cba_region.columns = cba_region.columns.str.replace('index', 'country').str.repl
 cba_region = cba_region.groupby(['region_code']).mean().T.drop('unnamed:_48', axis = 0)
 cba_region.to_csv('cba_rgn.csv', sep = '\t')
 
-'''
-wdi by regions (GDP)
-'''
 
-wdi_region = region_index.reset_index().set_index('short_name').join(wdi_data, lsuffix='_region', rsuffix='_wdi').set_index('country_code_wdi').drop(['country_code_region', 'indicator_code'], axis = 1)
+# wdi (gdp) by region
 
-wdi_region = wdi_region[(wdi_region.indicator_name == 'GDP per capita (current US$)')].drop('indicator_name', axis = 1).T.reset_index().rename(columns = {'index':'year'})
+wdi_region = region_index.reset_index().set_index('short_name').join(
+        wdi_data, lsuffix='_region', rsuffix='_wdi'
+        ).set_index('country_code_wdi').drop(['country_code_region', 'indicator_code'], axis = 1)
+
+wdi_region = wdi_region[(wdi_region.indicator_name == 'GDP per capita (current US$)')].drop(
+        'indicator_name', axis = 1).T.reset_index().rename(columns = {'index':'year'})
 wdi_region['year'] = wdi_region['year'].astype(int)
 wdi_region = wdi_region[(wdi_region.year >= 1970) & (wdi_region.year <= 2015)].set_index('year')
 
-wdi_region.to_csv('wdi_rgn_gdp.csv', sep = '\t')
+wdi_region.to_csv('wdi_rgn.csv', sep = '\t')
 
 
-'''
-By country wdi (GDP) and cba
-'''
+# wdi (gdp) and cba by country
 
 cba_country = cba_data[(cba_data.record == "CBA_MtCO2perCap")].drop(['record', 'unnamed:_48'], axis = 1)
 cba_country['code'] = 'cba'
 
 wdi_country = country_index.drop('region_code', axis = 1).join(wdi_data, lsuffix='_country', rsuffix = '_wdi')
-wdi_country = wdi_country[(wdi_country.indicator_name == "GDP per capita (current US$)")].drop(['indicator_name', 'country_code', 'indicator_code', 'region'], axis = 1).T.reset_index()
+wdi_country = wdi_country[(wdi_country.indicator_name == "GDP per capita (current US$)")].drop(
+        ['indicator_name', 'country_code', 'indicator_code', 'region'], axis = 1).T.reset_index()
 wdi_country = wdi_country.rename(index=str, columns={"index": "year"})
 wdi_country['year'] = wdi_country['year'].astype(int)
 wdi_country = wdi_country[(wdi_country.year >= 1970) & (wdi_country.year <= 2015)]
@@ -93,11 +81,17 @@ wdi_country['year'] = wdi_country['year'].astype(str)
 wdi_country = wdi_country.set_index('year').T
 wdi_country['code'] = 'wdi'
 
-country_filter = cba_country['code'].reset_index().set_index('country').join(wdi_country['code'].reset_index().set_index('index'), lsuffix = '_cba', rsuffix = '_wdi')
+country_filter = cba_country['code'].reset_index().set_index('country').join(
+        wdi_country['code'].reset_index().set_index('index'), lsuffix = '_cba', rsuffix = '_wdi')
 country_filter = country_filter[(country_filter.code_cba == 'cba') & (country_filter.code_wdi == 'wdi')].drop(['code_cba', 'code_wdi'], axis = 1)
 country_filter['country_list'] = country_filter.index.astype(str)
 
-country_data = country_filter.join(cba_country.append(wdi_country)).join(country_index.drop(['region'], axis = 1)).sort_index(axis=1, ascending=True).sort_values(by = ['code', 'country_list'], ascending=True)
+country_data = country_filter.join(cba_country.append(wdi_country)).join(
+        country_index.drop(['region'], axis = 1)).sort_index(axis=1, ascending=True).sort_values(by = ['code', 'country_list'], ascending=True)
 
-country_data = country_data[country_data.code == 'wdi'].drop(['code', 'region_code', 'country_list'], axis = 1).add_prefix('wdi_').join(country_data[country_data.code == 'cba'].drop(['code', 'region_code', 'country_list'], axis = 1).add_prefix('cba_'), rsuffix = '_cba', lsuffix = '_wdi').dropna().sort_index(axis = 1).T
+country_data = country_data[country_data.code == 'wdi'].drop(
+        ['code', 'region_code', 'country_list'], axis = 1).add_prefix('wdi_').join(
+                country_data[country_data.code == 'cba'].drop(
+                        ['code', 'region_code', 'country_list'], axis = 1).add_prefix('cba_'), rsuffix = '_cba', lsuffix = '_wdi').dropna(
+                        ).sort_index(axis = 1).T
 country_data.to_csv('country_data.csv', sep = '\t')

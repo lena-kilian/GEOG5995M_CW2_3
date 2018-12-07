@@ -1,4 +1,29 @@
 import random
+import os
+   
+def clean_col_headers(x):
+    '''
+    removes special characters from column headers, adds 'Y' to years in headers and removes capitalisation
+    '''
+    x.columns = x.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('(', '').str.replace(')', '').str.replace('"', '').str.replace('ï»¿', '')
+    x = x.dropna(axis = 1, how='all')
+
+def sig_level(x):
+    if x < 0.001:
+        return '***'
+    elif x < 0.01:
+        return '**'
+    elif x < 0.05:
+        return '*'
+    else:
+        return 'ns' 
+
+def create_folder(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print ('Error: Creating directory. ' +  directory)
 
 def remove_duplicates(var_list):
     var_list_unique = []
@@ -6,11 +31,6 @@ def remove_duplicates(var_list):
         if var_list[i] not in var_list_unique:
             var_list_unique.append(var_list[i])
     return var_list_unique
-
-'''
-could potentially add a make_legend function here??
-'''
-
 
 class Countries:
     
